@@ -3,21 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>News Summary</title>
     <link rel="stylesheet" href="styles.css">
+    <title>News Summary</title>
+    
 </head>
 <body>
 <div class="container">
-    <h1>News Summary</h1>
-    <form id="summaryForm">
-        <textarea id="textInput" placeholder="Enter text to summarize..." rows="10"></textarea>
-        <button type="submit">Summarize</button>
-    </form>
-    <div id="summaryResult">
-        <h2>Summary</h2>
-        <p id="summaryText"></p>
-    </div>
+    <textarea id="inputText"></textarea>
+    <textarea id="summaryText" readonly></textarea>
 </div>
+<button onclick="summarizeText()">Summarize</button>
 <script src="scripts.js"></script>
 </body>
 </html>
