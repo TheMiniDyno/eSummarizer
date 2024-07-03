@@ -31,7 +31,7 @@ public class TextRankSummarizer {
     }
 
     private int determineSummaryLength(int numSentencesInText) {
-        return (int) Math.ceil(numSentencesInText * 0.3); // Adjust this to set the length of the summary
+        return (int) Math.ceil(numSentencesInText * 0.5); // Adjust this to set the length of the summary
     }
 
     private Map<String, Set<String>> buildGraph(List<String> sentences) {
