@@ -24,7 +24,7 @@ async function summarizeText() {
         const summaryInfo = await response.json();
 
         // Display the summary
-        document.getElementById('summaryText').value = summaryInfo.summarizedText.join('\n');
+        document.getElementById('summaryText').value = summaryInfo.summarizedText.join('.');
 
         // Update statistics
         document.getElementById('originalSentences').textContent = summaryInfo.originalSentenceCount;

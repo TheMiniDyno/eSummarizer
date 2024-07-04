@@ -1,36 +1,61 @@
 package com.summary.NewsSummary;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringTokenizer;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.*;
+import java.util.stream.*;
 
 @Service
 public class Preprocessor {
 
-    // Split text into sentences
+    private final Set<String> STOPWORDS;
+
+    @Autowired
+    private LemmatizationService lemmatizationService;
+
+    public Preprocessor() {
+        STOPWORDS = loadStopwordsFromCsv("stopwords.csv");
+    }
+
+    private Set<String> loadStopwordsFromCsv(String filename) {
+        Set<String> stopwords = new HashSet<>();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new ClassPathResource(filename).getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] words = line.split(",");
+                for (String word : words) {
+                    if (!word.isEmpty()) {
+                        stopwords.add(word.trim());
+                    }
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error loading stopwords: " + e.getMessage());
+            // You might want to throw a custom exception here
+        }
+        return stopwords;
+    }
+
     public List<String> tokenizeSentences(String text) {
-        // Split text into sentences using regular expression
-        String[] sentences = text.split("(?<!Mr|Mrs|Ms|Dr|\\b[A-Z])\\.\\s+");
-        List<String> result = new ArrayList<>();
-        for (String sentence : sentences) {
-            result.add(sentence.trim());
-        }
-        return result;
+        return Arrays.asList(text.split("(?<!\\w\\.\\w.)(?<![A-Z][a-z]\\.)(?<=\\.|\\?|\\!)\\s"));
     }
 
-    // Split sentence into words
     public List<String> tokenizeWords(String sentence) {
-        StringTokenizer tokenizer = new StringTokenizer(sentence, " .,;:!?()[]\"");
-        List<String> words = new ArrayList<>();
-        while (tokenizer.hasMoreTokens()) {
-            words.add(tokenizer.nextToken().toLowerCase());
-        }
-        return words;
+        return Arrays.asList(sentence.toLowerCase().replaceAll("[^a-zA-Z0-9\\s]", "").split("\\s+"));
     }
 
-    // Preprocess the text
-    public List<String> preprocess(String text) {
-        return tokenizeSentences(text);
+    public List<String> removeStopwordsAndLemmatize(List<String> sentences) {
+        return sentences.stream().map(sentence -> {
+            List<String> words = tokenizeWords(sentence);
+            return words.stream()
+                    .filter(word -> !STOPWORDS.contains(word))
+                    .map(lemmatizationService::lemmatize)
+                    .collect(Collectors.joining(" "));
+        }).collect(Collectors.toList());
     }
 }
