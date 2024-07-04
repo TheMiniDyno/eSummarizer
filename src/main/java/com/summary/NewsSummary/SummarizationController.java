@@ -1,15 +1,17 @@
 package com.summary.NewsSummary;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 public class SummarizationController {
 
+    @Autowired
+    private TextRankSummarizer summarizer;
+
+    // Handle POST requests to /summarize
     @PostMapping("/summarize")
-    public List<String> summarize(@RequestBody String text) {
-        TextRankSummarizer summarizer = new TextRankSummarizer();
+    public SummaryInfo summarize(@RequestBody String text) {
         return summarizer.summarize(text);
     }
 }

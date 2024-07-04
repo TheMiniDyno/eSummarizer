@@ -1,18 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="styles.css" />
-    <title>News Summary</title>
-  </head>
-  <body>
-    <h1>Text summarizer</h1>
-    <div class="container">
-      <textarea id="inputText"></textarea>
-      <textarea id="summaryText" readonly></textarea>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>Text Summarizer</title>
+</head>
+<body>
+<h1>Text Summarizer</h1>
+<div class="container">
+  <div class="column">
+    <textarea id="inputText" placeholder="Enter your text here..."></textarea>
+    <div class="stats">
+      <p>Original Sentences: <span id="originalSentences"></span></p>
+      <p>Original Words: <span id="originalWords"></span></p>
     </div>
-    <button onclick="summarizeText()">Summarize</button>
-    <script src="scripts.js"></script>
-  </body>
+  </div>
+  <div class="column">
+    <textarea id="summaryText" readonly placeholder="Summary will appear here..."></textarea>
+    <div class="stats">
+      <p>Summarized Sentences: <span id="summarizedSentences"></span></p>
+      <p>Summarized Words: <span id="summarizedWords"></span></p>
+    </div>
+  </div>
+</div>
+<div class="reduction-rate">
+  <p>Reduction Rate: <span id="reductionRate"></span></p>
+</div>
+<button onclick="summarizeText()">Summarize</button>
+<button onclick="clearAll()">Clear</button>
+
+<script src="scripts.js"></script>
+</body>
 </html>

@@ -1,39 +1,55 @@
 package com.summary.NewsSummary;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import java.util.*;
-import java.util.stream.Collectors;
 
+@Service
 public class TextRankSummarizer {
+
+    @Autowired
+    private Preprocessor preprocessor;
 
     private static final double DAMPING_FACTOR = 0.85;
     private static final int MAX_ITERATIONS = 100;
     private static final double MIN_DIFF = 0.001;
 
-    public List<String> summarize(String text) {
-        List<String> sentences = tokenizeSentences(text);
+    // Main summarization method
+    public SummaryInfo summarize(String text) {
+        List<String> sentences = preprocessor.tokenizeSentences(text);
+        int originalSentenceCount = sentences.size();
+        int originalWordCount = countWords(text);
+
         int numSentences = determineSummaryLength(sentences.size());
         Map<String, Set<String>> graph = buildGraph(sentences);
         Map<String, Double> scores = rankSentences(sentences, graph);
-        return selectTopSentences(scores, numSentences);
+        List<String> summarizedSentences = selectTopSentences(scores, numSentences);
+
+        String summarizedText = String.join(" ", summarizedSentences);
+        int summarizedWordCount = countWords(summarizedText);
+        double reductionRate = 1 - ((double) summarizedWordCount / originalWordCount);
+
+        return new SummaryInfo(
+                summarizedSentences,
+                originalSentenceCount,
+                summarizedSentences.size(),
+                originalWordCount,
+                summarizedWordCount,
+                reductionRate
+        );
     }
 
-    private List<String> tokenizeSentences(String text) {
-        // Simple tokenizer based on period '.' and newline '\n'
-        String[] sentencesArray = text.split("[.!?]\\s+");
-        List<String> sentences = new ArrayList<>();
-        for (String sentence : sentencesArray) {
-            String trimmedSentence = sentence.trim();
-            if (!trimmedSentence.isEmpty()) {
-                sentences.add(trimmedSentence);
-            }
-        }
-        return sentences;
+    // Count words in a given text
+    private int countWords(String text) {
+        return text.split("\\s+").length;
     }
 
+    // Determine the length of the summary
     private int determineSummaryLength(int numSentencesInText) {
-        return (int) Math.ceil(numSentencesInText * 0.5); // Adjust this to set the length of the summary
+        return (int) Math.ceil(numSentencesInText * 0.5); // 50% of original length
     }
 
+    // Build the graph of sentence similarities
     private Map<String, Set<String>> buildGraph(List<String> sentences) {
         Map<String, Set<String>> graph = new HashMap<>();
         for (String sentence : sentences) {
@@ -54,6 +70,7 @@ public class TextRankSummarizer {
         return graph;
     }
 
+    // Calculate TF-IDF vectors for sentences
     private Map<String, Map<String, Double>> calculateTFIDFVectors(List<String> sentences) {
         Set<String> vocabulary = new HashSet<>();
         for (String sentence : sentences) {
@@ -89,6 +106,7 @@ public class TextRankSummarizer {
         return tfidfVectors;
     }
 
+    // Calculate cosine similarity between two vectors
     private double cosineSimilarity(Map<String, Double> vector1, Map<String, Double> vector2) {
         double dotProduct = 0.0;
         for (Map.Entry<String, Double> entry : vector1.entrySet()) {
@@ -102,6 +120,7 @@ public class TextRankSummarizer {
         return dotProduct / (magnitude1 * magnitude2);
     }
 
+    // Calculate magnitude of a vector
     private double calculateMagnitude(Map<String, Double> vector) {
         double magnitude = 0.0;
         for (double value : vector.values()) {
@@ -110,6 +129,7 @@ public class TextRankSummarizer {
         return Math.sqrt(magnitude);
     }
 
+    // Rank sentences using TextRank algorithm
     private Map<String, Double> rankSentences(List<String> sentences, Map<String, Set<String>> graph) {
         Map<String, Double> scores = initializeScores(sentences);
         for (int i = 0; i < MAX_ITERATIONS; i++) {
@@ -129,6 +149,7 @@ public class TextRankSummarizer {
         return scores;
     }
 
+    // Initialize scores for TextRank algorithm
     private Map<String, Double> initializeScores(List<String> sentences) {
         Map<String, Double> scores = new HashMap<>();
         double initialScore = 1.0 / sentences.size();
@@ -138,6 +159,7 @@ public class TextRankSummarizer {
         return scores;
     }
 
+    // Select top sentences based on their scores
     private List<String> selectTopSentences(Map<String, Double> scores, int numSentences) {
         List<Map.Entry<String, Double>> sortedEntries = new ArrayList<>(scores.entrySet());
         sortedEntries.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));
@@ -147,4 +169,32 @@ public class TextRankSummarizer {
         }
         return topSentences;
     }
+}
+
+// Class to hold summary information
+class SummaryInfo {
+    private List<String> summarizedText;
+    private int originalSentenceCount;
+    private int summarizedSentenceCount;
+    private int originalWordCount;
+    private int summarizedWordCount;
+    private double reductionRate;
+
+    public SummaryInfo(List<String> summarizedText, int originalSentenceCount, int summarizedSentenceCount,
+                       int originalWordCount, int summarizedWordCount, double reductionRate) {
+        this.summarizedText = summarizedText;
+        this.originalSentenceCount = originalSentenceCount;
+        this.summarizedSentenceCount = summarizedSentenceCount;
+        this.originalWordCount = originalWordCount;
+        this.summarizedWordCount = summarizedWordCount;
+        this.reductionRate = reductionRate;
+    }
+
+    // Getters
+    public List<String> getSummarizedText() { return summarizedText; }
+    public int getOriginalSentenceCount() { return originalSentenceCount; }
+    public int getSummarizedSentenceCount() { return summarizedSentenceCount; }
+    public int getOriginalWordCount() { return originalWordCount; }
+    public int getSummarizedWordCount() { return summarizedWordCount; }
+    public double getReductionRate() { return reductionRate; }
 }
