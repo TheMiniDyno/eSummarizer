@@ -7,10 +7,6 @@ body {
   padding: 20px;
 }
 
-h1 {
-  margin-top: 20px;
-}
-
 .container {
   display: flex;
   justify-content: space-between;
@@ -50,7 +46,7 @@ textarea {
 
 .reduction-rate {
   background-color: #6e6b6b;
-  padding: 10px;
+
   border-radius: 5px;
   width: 200px;
   margin: 20px auto;

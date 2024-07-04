@@ -61,6 +61,3 @@ function clearAll() {
     document.getElementById('summarizedWords').textContent = '';
     document.getElementById('reductionRate').textContent = '';
 }
-
-// Optional: Add this line if you want to show statistics only after summarization
-// document.querySelector('.stats').style.display = 'none';
