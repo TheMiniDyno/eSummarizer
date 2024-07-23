@@ -1,3 +1,6 @@
+let typingTimeouts = [];
+let isClearing = false;
+
 // Function to summarize the input text
 async function summarizeText() {
     const text = document.getElementById('inputText').value;
@@ -26,7 +29,11 @@ async function summarizeText() {
         // display the summary
         let cleanedSummary = summaryInfo.summarizedText;
 
-        document.getElementById('summaryText').value = cleanedSummary;
+        // Clear any existing typewriter animations before starting a new one
+        clearAllTimeouts();
+        isClearing = false;
+        document.getElementById('summaryText').value = ''; // Clear the textarea before starting the animation
+        typeWriter(cleanedSummary, document.getElementById('summaryText'), 0, 0.1);
 
         // Update statistics
         document.getElementById('originalSentences').textContent = summaryInfo.originalSentenceCount;
@@ -41,8 +48,32 @@ async function summarizeText() {
     }
 }
 
+// Function to type text letter by letter
+function typeWriter(text, textArea, index, speed) {
+    if (isClearing) {
+        return;
+    }
+
+    if (index < text.length) {
+        textArea.value += text.charAt(index);
+        index++;
+        const timeoutId = setTimeout(function () {
+            typeWriter(text, textArea, index, speed);
+        }, speed);
+        typingTimeouts.push(timeoutId);
+    }
+}
+
+// Function to clear all timeouts
+function clearAllTimeouts() {
+    for (const timeoutId of typingTimeouts) {
+        clearTimeout(timeoutId);
+    }
+    typingTimeouts = [];
+}
+
 // Optional: Add event listener for Enter key in input textarea
-document.getElementById('inputText').addEventListener('keydown', function(event) {
+document.getElementById('inputText').addEventListener('keydown', function (event) {
     if (event.key === 'Enter' && event.ctrlKey) {
         event.preventDefault(); // Prevent default action
         summarizeText(); // Call the summarize function
@@ -51,6 +82,8 @@ document.getElementById('inputText').addEventListener('keydown', function(event)
 
 // Optional: Add function to clear input and results
 function clearAll() {
+    isClearing = true;
+    clearAllTimeouts();
     document.getElementById('inputText').value = '';
     document.getElementById('summaryText').value = '';
     document.getElementById('originalSentences').textContent = '';
@@ -59,3 +92,11 @@ function clearAll() {
     document.getElementById('summarizedWords').textContent = '';
     document.getElementById('reductionRate').textContent = '';
 }
+
+
+//..............footer
+document.addEventListener('DOMContentLoaded', function () {
+    const yearSpan = document.getElementById('year');
+    const currentYear = new Date().getFullYear();
+    yearSpan.textContent = currentYear;
+});

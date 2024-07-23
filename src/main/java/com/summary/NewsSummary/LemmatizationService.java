@@ -25,7 +25,8 @@ public class LemmatizationService {
     }
 
     private void loadDictionary() throws IOException, CsvValidationException {
-        try (CSVReader reader = new CSVReader(new FileReader(new ClassPathResource("lemmatization_dictionary.csv").getFile()))) {
+        try (CSVReader reader = new CSVReader(
+                new FileReader(new ClassPathResource("lemmatization_dictionary.csv").getFile()))) {
             String[] line;
             while ((line = reader.readNext()) != null) {
                 if (line.length >= 2) {

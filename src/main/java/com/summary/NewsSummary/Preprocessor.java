@@ -24,7 +24,8 @@ public class Preprocessor {
 
     private Set<String> loadStopwordsFromCsv(String filename) {
         Set<String> stopwords = new HashSet<>();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new ClassPathResource(filename).getInputStream()))) {
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(new ClassPathResource(filename).getInputStream()))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] words = line.split(",");

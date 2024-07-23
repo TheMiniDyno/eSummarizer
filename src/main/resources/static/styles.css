@@ -1,58 +1,61 @@
- *{margin: 0;
-   padding: 0;
-    
+@import url("https://fonts.googleapis.com/css2?family=Pacifico&display=swap");
+* {
+  margin: 0;
+  padding: 0;
 }
- body {
+
+body {
   color: white;
   text-align: center;
-  background-color: #4f4e4e;
+  background-color: #181818;
   font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 20px;
 }
-h1{
-  font-size: larger;
+
+nav {
+  height: 100px;
+  width: 100%;
+  background-color: #181818;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-bottom: 1px solid gray;
+}
+
+h1 {
+  font-family: "Pacifico", cursive;
+  font-size: 50px;
+  font-weight: lighter;
+}
+
+a {
+  color: white;
 }
 
 .container {
   display: flex;
-  justify-content: space-evenly;
-  margin: 20px 0;
+  justify-content: space-around;
+  align-items: flex-start;
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 .column {
-  width: 48%;
+  width: 50%;
   display: flex;
-  margin: 20px;
   flex-direction: column;
-}
-
-textarea {
-  color: white;
-  background-color: #6e6b6b;
-  width: 100%;
-  height: 300px;
-  border-radius: 5px;
-  border: 1px solid #888;
+  align-items: center;
   padding: 10px;
-  font-size: 14px;
-  resize: vertical;
-  margin-bottom: 10px;
-  
-}
-textarea::placeholder{
-  color: white;
 }
 
 .stats {
-  background-color: #6e6b6b;
-  padding: 10px;
+  background-color: #323232;
+  padding: 5px;
   border-radius: 5px;
   text-align: left;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-evenly;
   width: 100%;
+  height: 75px;
+  box-sizing: border-box;
 }
 
 .stats p {
@@ -62,28 +65,86 @@ textarea::placeholder{
 }
 
 .reduction-rate {
-  background-color: #6e6b6b;
-
+  background-color: #323232;
   border-radius: 5px;
   width: 200px;
   margin: 20px auto;
 }
 
 button {
-  width: auto;
+  width: 120px;
   height: 50px;
   font-size: large;
   border-radius: 5px;
   border-style: none;
-  background-color: #6e6b6b;
+  background-color: #323232;
   color: white;
   cursor: pointer;
-  padding: 0 20px;
-  margin-top: 20px;
+  margin: 10px;
+  text-align: center;
 }
 
 button:hover {
-  background-color: white;
-  color: black;
+  background-color: #03045e;
+  transition: 0.3s ease;
+}
+
+textarea::placeholder {
+  color: white;
+}
+textarea {
+  color: white;
+  background-color: #323232;
+  width: 100%;
+  height: 300px;
+  border-radius: 5px;
+  border: none;
+  padding: 10px;
+  font-size: 16px;
+  resize: none;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+  /* Modern scrollbar styles */
+  scrollbar-width: thin; /* For Firefox */
+  scrollbar-color: #101010 #3e3e3e; /* For Firefox: thumb color and track color */
+}
+
+/* Styling the scrollbar for WebKit browsers */
+textarea::-webkit-scrollbar {
+  width: 12px; /* Width of the scrollbar */
+}
+
+textarea::-webkit-scrollbar-track {
+  background-color: #3e3e3e; /* Background color of the scrollbar track */
+  border-radius: 10px; /* Rounded corners for the track */
+}
+
+textarea::-webkit-scrollbar-thumb {
+  background-color: #101010; /* Color of the scrollbar thumb */
+  border-radius: 10px; /* Rounded corners for the thumb */
+}
+
+textarea::-webkit-scrollbar-thumb:hover {
+  background-color: #101010; /* Darker shade on hover */
+}
+/*.........footer*/
+
+footer {
+  margin-top: 30px;
+  height: 100px;
+  width: 100%;
+  background-color: #181818;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  justify-content: center;
+  border-top: 1px solid gray;
+}
+footer a {
+  color: white;
+  text-decoration: none;
+}
+footer a:hover {
+  color: green;
   transition: 0.3s ease;
 }
