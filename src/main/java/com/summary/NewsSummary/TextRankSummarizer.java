@@ -27,12 +27,14 @@ public class TextRankSummarizer {
 
         List<String> summarizedSentences = selectTopSentences(scores, numSentences, originalSentences, processedSentences);
 
-        String summarizedText = String.join(" ", summarizedSentences);
+        // Join sentences with a single space and clean up extra spaces and punctuation
+        String summarizedText = String.join(" ", summarizedSentences).replaceAll("\\s+", " ").replaceAll("\\.\\s*\\.", ".").trim();
+
         int summarizedWordCount = countWords(summarizedText);
         double reductionRate = 1 - ((double) summarizedWordCount / originalWordCount);
 
         return new SummaryInfo(
-                summarizedSentences,
+                summarizedText,
                 originalSentenceCount,
                 summarizedSentences.size(),
                 originalWordCount,
@@ -169,14 +171,14 @@ public class TextRankSummarizer {
 }
 
 class SummaryInfo {
-    private List<String> summarizedText;
+    private String summarizedText;
     private int originalSentenceCount;
     private int summarizedSentenceCount;
     private int originalWordCount;
     private int summarizedWordCount;
     private double reductionRate;
 
-    public SummaryInfo(List<String> summarizedText, int originalSentenceCount, int summarizedSentenceCount,
+    public SummaryInfo(String summarizedText, int originalSentenceCount, int summarizedSentenceCount,
                        int originalWordCount, int summarizedWordCount, double reductionRate) {
         this.summarizedText = summarizedText;
         this.originalSentenceCount = originalSentenceCount;
@@ -187,7 +189,7 @@ class SummaryInfo {
     }
 
     // Getters
-    public List<String> getSummarizedText() { return summarizedText; }
+    public String getSummarizedText() { return summarizedText; }
     public int getOriginalSentenceCount() { return originalSentenceCount; }
     public int getSummarizedSentenceCount() { return summarizedSentenceCount; }
     public int getOriginalWordCount() { return originalWordCount; }

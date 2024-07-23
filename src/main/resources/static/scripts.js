@@ -23,8 +23,10 @@ async function summarizeText() {
 
         const summaryInfo = await response.json();
 
-        // Display the summary
-        document.getElementById('summaryText').value = summaryInfo.summarizedText.join('.');
+        // display the summary
+        let cleanedSummary = summaryInfo.summarizedText;
+
+        document.getElementById('summaryText').value = cleanedSummary;
 
         // Update statistics
         document.getElementById('originalSentences').textContent = summaryInfo.originalSentenceCount;
@@ -32,10 +34,6 @@ async function summarizeText() {
         document.getElementById('originalWords').textContent = summaryInfo.originalWordCount;
         document.getElementById('summarizedWords').textContent = summaryInfo.summarizedWordCount;
         document.getElementById('reductionRate').textContent = (summaryInfo.reductionRate * 100).toFixed(2) + '%';
-
-        // Show statistics (they're always visible now, so we don't need to change display)
-        // Uncomment the next line if you want to show/hide the entire stats section
-        // document.querySelector('.stats').style.display = 'block';
 
     } catch (error) {
         console.error('Error:', error);
