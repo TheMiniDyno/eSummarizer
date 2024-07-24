@@ -37,7 +37,7 @@ public class Preprocessor {
             }
         } catch (IOException e) {
             System.err.println("Error loading stopwords: " + e.getMessage());
-            // You might want to throw a custom exception here
+            //  throw a custom exception here
         }
         return stopwords;
     }

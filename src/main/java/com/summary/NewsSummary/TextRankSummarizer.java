@@ -22,11 +22,11 @@ public class TextRankSummarizer {
         int originalWordCount = countWords(text);
 
         int numSentences = determineSummaryLength(originalSentences.size());
-        Map<String, Set<String>> graph = buildGraph(processedSentences);
+        double similarityThreshold = determineDynamicThreshold(originalSentenceCount);
+        Map<String, Set<String>> graph = buildGraph(processedSentences, similarityThreshold);
         Map<String, Double> scores = rankSentences(processedSentences, graph);
 
-        List<String> summarizedSentences = selectTopSentences(scores, numSentences, originalSentences,
-                processedSentences);
+        List<String> summarizedSentences = selectTopSentences(scores, numSentences, originalSentences, processedSentences);
 
         // Join sentences with a single space and clean up extra spaces and punctuation
         String summarizedText = String.join(" ", summarizedSentences).replaceAll("\\s+", " ")
@@ -52,7 +52,17 @@ public class TextRankSummarizer {
         return Math.max(1, (int) Math.ceil(numSentencesInText * 0.5));
     }
 
-    private Map<String, Set<String>> buildGraph(List<String> sentences) {
+    private double determineDynamicThreshold(int sentenceCount) {
+        if (sentenceCount < 10) {
+            return 0.1;  // very short documents
+        } else if (sentenceCount < 20) {
+            return 0.15; //  medium-length documents
+        } else {
+            return 0.2;  //  longer documents
+        }
+    }
+
+    private Map<String, Set<String>> buildGraph(List<String> sentences, double similarityThreshold) {
         Map<String, Set<String>> graph = new HashMap<>();
         for (String sentence : sentences) {
             graph.put(sentence, new HashSet<>());
@@ -63,7 +73,7 @@ public class TextRankSummarizer {
             for (int j = i + 1; j < sentences.size(); j++) {
                 String sentence2 = sentences.get(j);
                 double similarity = cosineSimilarity(tfidfVectors.get(sentence1), tfidfVectors.get(sentence2));
-                if (similarity > 0.1) {
+                if (similarity > similarityThreshold) {
                     graph.get(sentence1).add(sentence2);
                     graph.get(sentence2).add(sentence1);
                 }
@@ -158,7 +168,7 @@ public class TextRankSummarizer {
     }
 
     private List<String> selectTopSentences(Map<String, Double> scores, int numSentences,
-            List<String> originalSentences, List<String> processedSentences) {
+                                            List<String> originalSentences, List<String> processedSentences) {
         List<Map.Entry<String, Double>> sortedEntries = new ArrayList<>(scores.entrySet());
         sortedEntries.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));
         List<String> topSentences = new ArrayList<>();
@@ -181,7 +191,7 @@ class SummaryInfo {
     private double reductionRate;
 
     public SummaryInfo(String summarizedText, int originalSentenceCount, int summarizedSentenceCount,
-            int originalWordCount, int summarizedWordCount, double reductionRate) {
+                       int originalWordCount, int summarizedWordCount, double reductionRate) {
         this.summarizedText = summarizedText;
         this.originalSentenceCount = originalSentenceCount;
         this.summarizedSentenceCount = summarizedSentenceCount;

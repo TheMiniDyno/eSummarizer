@@ -101,6 +101,7 @@ textarea {
   border: none;
   padding: 10px;
   font-size: 16px;
+  font-weight: lighter;
   resize: none;
   margin-bottom: 10px;
   box-sizing: border-box;
@@ -143,6 +144,7 @@ footer {
 footer a {
   color: white;
   text-decoration: none;
+  margin-top: 5px;
 }
 footer a:hover {
   color: green;
