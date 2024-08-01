@@ -20,23 +20,22 @@
   <div class="container">
     <div class="column">
       <textarea id="inputText" placeholder="Enter your text here..."></textarea>
+    </div>
+   <div>
+     <a href="#summary"><button onclick="summarizeText()">Summarize</button></a>
+     <button onclick="clearAll()">Clear</button>
+   </div>
+    <div class="column" id="summary">
+      <textarea id="summaryText" readonly placeholder="Summary will appear here..."></textarea>
       <div class="stats">
         <p>Original Sentences: <span id="originalSentences"></span></p>
         <p>Original Words: <span id="originalWords"></span></p>
-      </div>
-    </div>
-    <div class="column">
-      <textarea id="summaryText" readonly placeholder="Summary will appear here..."></textarea>
-      <div class="stats">
         <p>Summarized Sentences: <span id="summarizedSentences"></span></p>
         <p>Summarized Words: <span id="summarizedWords"></span></p>
-        <p class="reduction-rate">Reduction Rate: <span id="reductionRate"></span></p>
+        <p>Reduction Rate: <span id="reductionRate"></span></p>
       </div>
     </div>
   </div>
-
-  <button onclick="summarizeText()">Summarize</button>
-  <button onclick="clearAll()">Clear</button>
 
   <footer>
     <p>&copy; <span id="year"></span> Project all rights reserved.</p>
