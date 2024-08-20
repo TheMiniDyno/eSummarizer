@@ -22,26 +22,64 @@ public class TextRankSummarizer {
         int originalWordCount = countWords(text);
 
         int numSentences = determineSummaryLength(originalSentences.size());
-        double similarityThreshold = determineDynamicThreshold(originalSentenceCount);
-        Map<String, Set<String>> graph = buildGraph(processedSentences, similarityThreshold);
+
+        Map<String, Map<String, Double>> tfidfVectors = calculateTFIDFVectors(processedSentences);
+        double similarityThreshold = determineDynamicThreshold(processedSentences, tfidfVectors);
+        Map<String, Set<String>> graph = buildGraph(processedSentences, similarityThreshold, tfidfVectors);
+
+        // Rank sentences using the graph
         Map<String, Double> scores = rankSentences(processedSentences, graph);
 
+        // Apply sentence position bias
+        scores = incorporatePositionBias(scores, processedSentences);
+
+        // Adjust scores based on sentence length
+        scores = adjustForSentenceLength(scores, processedSentences);
+
+        // Select the top sentences for the summary
         List<String> summarizedSentences = selectTopSentences(scores, numSentences, originalSentences, processedSentences);
 
-        // Join sentences with a single space and clean up extra spaces and punctuation
+        List<SentenceRank> sentenceRanks = new ArrayList<>();
+        for (int i = 0; i < originalSentences.size(); i++) {
+            String originalSentence = originalSentences.get(i);
+            double rank = scores.getOrDefault(processedSentences.get(i), 0.0);
+            sentenceRanks.add(new SentenceRank(originalSentence, rank));
+        }
+        sentenceRanks.sort((a, b) -> Double.compare(b.getRank(), a.getRank())); // Sort by rank descending
+
         String summarizedText = String.join(" ", summarizedSentences).replaceAll("\\s+", " ")
                 .replaceAll("\\.\\s*\\.", ".").trim();
 
         int summarizedWordCount = countWords(summarizedText);
         double reductionRate = 1 - ((double) summarizedWordCount / originalWordCount);
 
-        return new SummaryInfo(
+        List<GraphNode> graphNodes = new ArrayList<>();
+        List<GraphLink> graphLinks = new ArrayList<>();
+
+        for (int i = 0; i < processedSentences.size(); i++) {
+            graphNodes.add(new GraphNode(i + 1, scores.get(processedSentences.get(i))));
+        }
+
+        for (Map.Entry<String, Set<String>> entry : graph.entrySet()) {
+            int sourceId = processedSentences.indexOf(entry.getKey()) + 1;
+            for (String neighbor : entry.getValue()) {
+                int targetId = processedSentences.indexOf(neighbor) + 1;
+                graphLinks.add(new GraphLink(sourceId, targetId));
+            }
+        }
+
+        SummaryInfo summaryInfo = new SummaryInfo(
                 summarizedText,
                 originalSentenceCount,
                 summarizedSentences.size(),
                 originalWordCount,
                 summarizedWordCount,
                 reductionRate);
+
+        summaryInfo.setSentenceRanks(sentenceRanks);
+        summaryInfo.setGraphData(graphNodes, graphLinks);
+
+        return summaryInfo;
     }
 
     private int countWords(String text) {
@@ -52,33 +90,43 @@ public class TextRankSummarizer {
         return Math.max(1, (int) Math.ceil(numSentencesInText * 0.5));
     }
 
-    private double determineDynamicThreshold(int sentenceCount) {
-        if (sentenceCount < 10) {
-            return 0.1;  // very short documents
-        } else if (sentenceCount < 20) {
-            return 0.15; //  medium-length documents
-        } else {
-            return 0.2;  //  longer documents
-        }
-    }
+    private double determineDynamicThreshold(List<String> sentences, Map<String, Map<String, Double>> tfidfVectors) {
+        List<Double> similarities = new ArrayList<>();
 
-    private Map<String, Set<String>> buildGraph(List<String> sentences, double similarityThreshold) {
-        Map<String, Set<String>> graph = new HashMap<>();
-        for (String sentence : sentences) {
-            graph.put(sentence, new HashSet<>());
-        }
-        Map<String, Map<String, Double>> tfidfVectors = calculateTFIDFVectors(sentences);
         for (int i = 0; i < sentences.size(); i++) {
             String sentence1 = sentences.get(i);
             for (int j = i + 1; j < sentences.size(); j++) {
                 String sentence2 = sentences.get(j);
                 double similarity = cosineSimilarity(tfidfVectors.get(sentence1), tfidfVectors.get(sentence2));
+                similarities.add(similarity);
+            }
+        }
+
+        Collections.sort(similarities);
+        double percentile = 0.50;
+        int percentileIndex = (int) (similarities.size() * percentile);
+        return similarities.get(percentileIndex);
+    }
+
+    private Map<String, Set<String>> buildGraph(List<String> sentences, double similarityThreshold, Map<String, Map<String, Double>> tfidfVectors) {
+        Map<String, Set<String>> graph = new HashMap<>();
+        for (String sentence : sentences) {
+            graph.put(sentence, new HashSet<>());
+        }
+
+        for (int i = 0; i < sentences.size(); i++) {
+            String sentence1 = sentences.get(i);
+            for (int j = i + 1; j < sentences.size(); j++) {
+                String sentence2 = sentences.get(j);
+                double similarity = cosineSimilarity(tfidfVectors.get(sentence1), tfidfVectors.get(sentence2));
+
                 if (similarity > similarityThreshold) {
                     graph.get(sentence1).add(sentence2);
                     graph.get(sentence2).add(sentence1);
                 }
             }
         }
+
         return graph;
     }
 
@@ -119,23 +167,23 @@ public class TextRankSummarizer {
 
     private double cosineSimilarity(Map<String, Double> vector1, Map<String, Double> vector2) {
         double dotProduct = 0.0;
-        for (Map.Entry<String, Double> entry : vector1.entrySet()) {
-            dotProduct += entry.getValue() * vector2.getOrDefault(entry.getKey(), 0.0);
-        }
-        double magnitude1 = calculateMagnitude(vector1);
-        double magnitude2 = calculateMagnitude(vector2);
-        if (magnitude1 == 0.0 || magnitude2 == 0.0) {
-            return 0.0;
-        }
-        return dotProduct / (magnitude1 * magnitude2);
-    }
+        double norm1 = 0.0;
+        double norm2 = 0.0;
+        Set<String> allWords = new HashSet<>(vector1.keySet());
+        allWords.addAll(vector2.keySet());
 
-    private double calculateMagnitude(Map<String, Double> vector) {
-        double magnitude = 0.0;
-        for (double value : vector.values()) {
-            magnitude += Math.pow(value, 2);
+        for (String word : allWords) {
+            double v1 = vector1.getOrDefault(word, 0.0);
+            double v2 = vector2.getOrDefault(word, 0.0);
+            dotProduct += v1 * v2;
+            norm1 += v1 * v1;
+            norm2 += v2 * v2;
         }
-        return Math.sqrt(magnitude);
+
+        norm1 = Math.sqrt(norm1);
+        norm2 = Math.sqrt(norm2);
+
+        return (norm1 == 0.0 || norm2 == 0.0) ? 0.0 : dotProduct / (norm1 * norm2);
     }
 
     private Map<String, Double> rankSentences(List<String> sentences, Map<String, Set<String>> graph) {
@@ -152,8 +200,9 @@ public class TextRankSummarizer {
                 maxChange = Math.max(maxChange, Math.abs(rank - scores.get(sentence)));
             }
             scores = newScores;
-            if (maxChange < MIN_DIFF)
+            if (maxChange < MIN_DIFF) {
                 break;
+            }
         }
         return scores;
     }
@@ -167,61 +216,42 @@ public class TextRankSummarizer {
         return scores;
     }
 
-    private List<String> selectTopSentences(Map<String, Double> scores, int numSentences,
-                                            List<String> originalSentences, List<String> processedSentences) {
-        List<Map.Entry<String, Double>> sortedEntries = new ArrayList<>(scores.entrySet());
-        sortedEntries.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));
-        List<String> topSentences = new ArrayList<>();
-        for (int i = 0; i < Math.min(numSentences, sortedEntries.size()); i++) {
-            String processedSentence = sortedEntries.get(i).getKey();
-            int index = processedSentences.indexOf(processedSentence);
-            topSentences.add(originalSentences.get(index));
+    private Map<String, Double> incorporatePositionBias(Map<String, Double> scores, List<String> sentences) {
+        double totalSentences = sentences.size();
+        for (int i = 0; i < sentences.size(); i++) {
+            String sentence = sentences.get(i);
+            double positionBias = (totalSentences - i) / totalSentences; // Higher bias for earlier sentences
+            scores.put(sentence, scores.get(sentence) + positionBias);
         }
-        topSentences.sort(Comparator.comparingInt(originalSentences::indexOf));
+        return scores;
+    }
+
+    private Map<String, Double> adjustForSentenceLength(Map<String, Double> scores, List<String> sentences) {
+        for (int i = 0; i < sentences.size(); i++) {
+            String sentence = sentences.get(i);
+            double lengthFactor = Math.log(sentence.split("\\s+").length + 1);
+            scores.put(sentence, scores.get(sentence) * lengthFactor);
+        }
+        return scores;
+    }
+
+    private List<String> selectTopSentences(Map<String, Double> scores, int numSentences, List<String> originalSentences, List<String> processedSentences) {
+        List<Map.Entry<String, Double>> sortedSentences = new ArrayList<>(scores.entrySet());
+        sortedSentences.sort((a, b) -> Double.compare(b.getValue(), a.getValue())); // Sort by score descending
+
+        List<String> topSentences = new ArrayList<>();
+        Set<String> selectedProcessedSentences = new HashSet<>();
+
+        for (int i = 0; i < Math.min(numSentences, sortedSentences.size()); i++) {
+            selectedProcessedSentences.add(sortedSentences.get(i).getKey());
+        }
+
+        for (int i = 0; i < originalSentences.size(); i++) {
+            if (selectedProcessedSentences.contains(processedSentences.get(i))) {
+                topSentences.add(originalSentences.get(i));
+            }
+        }
+
         return topSentences;
-    }
-}
-
-class SummaryInfo {
-    private String summarizedText;
-    private int originalSentenceCount;
-    private int summarizedSentenceCount;
-    private int originalWordCount;
-    private int summarizedWordCount;
-    private double reductionRate;
-
-    public SummaryInfo(String summarizedText, int originalSentenceCount, int summarizedSentenceCount,
-                       int originalWordCount, int summarizedWordCount, double reductionRate) {
-        this.summarizedText = summarizedText;
-        this.originalSentenceCount = originalSentenceCount;
-        this.summarizedSentenceCount = summarizedSentenceCount;
-        this.originalWordCount = originalWordCount;
-        this.summarizedWordCount = summarizedWordCount;
-        this.reductionRate = reductionRate;
-    }
-
-    // Getters
-    public String getSummarizedText() {
-        return summarizedText;
-    }
-
-    public int getOriginalSentenceCount() {
-        return originalSentenceCount;
-    }
-
-    public int getSummarizedSentenceCount() {
-        return summarizedSentenceCount;
-    }
-
-    public int getOriginalWordCount() {
-        return originalWordCount;
-    }
-
-    public int getSummarizedWordCount() {
-        return summarizedWordCount;
-    }
-
-    public double getReductionRate() {
-        return reductionRate;
     }
 }

@@ -14,7 +14,7 @@
 <body>
   <nav>
     <a href="#">
-      <h1>Text Summarizer</h1>
+      <h1>Extractive Text Summarizer</h1>
     </a>
   </nav>
   <div class="container">
@@ -34,6 +34,12 @@
         <p>Summarized Words: <span id="summarizedWords"></span></p>
         <p>Reduction Rate: <span id="reductionRate"></span></p>
       </div>
+      <div class="column" id="ranking">
+        <h3>Sentence Rankings</h3>
+        <ul id="rankingList"></ul>
+      </div>
+      <h2>Graph link</h2>
+      <div id="graph"></div>
     </div>
   </div>
 
@@ -42,6 +48,7 @@
     <a href="https://github.com/Deus-shakya"><i class="fa-brands fa-github"></i> Deus</a>
   </footer>
 
+  <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="scripts.js"></script>
 </body>
 

@@ -68,6 +68,37 @@ a {
   width: 100%;
 }
 
+#ranking {
+  margin-top: 20px;
+  background-color: #3e3e3e;
+  width: 100%;
+  border-radius: 5px;
+  box-sizing: border-box;
+
+}
+
+
+#rankingList {
+  text-align: left;
+  list-style-type: none;
+  padding: 0;
+}
+
+#rankingList li {
+  margin-bottom: 10px;
+  padding: 5px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+}
+
+#graph {
+  width: 100%;
+  height: 400px;
+  background-color: #3e3e3e;
+  border-radius: 5px;
+  margin-top: 20px;
+}
+
 button {
   width: 200px;
   height: 50px;
