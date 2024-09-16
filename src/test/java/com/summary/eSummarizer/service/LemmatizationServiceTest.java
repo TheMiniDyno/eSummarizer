@@ -1,5 +1,5 @@
-package com.summary.NewsSummary.service;
-import com.summary.NewsSummary.LemmatizationService;
+package com.summary.eSummarizer.service;
+import com.summary.eSummarizer.LemmatizationService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

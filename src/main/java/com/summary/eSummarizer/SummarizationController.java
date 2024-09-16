@@ -1,4 +1,4 @@
-package com.summary.NewsSummary;
+package com.summary.eSummarizer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

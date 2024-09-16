@@ -1,4 +1,4 @@
-package com.summary.NewsSummary;
+package com.summary.eSummarizer;
 
 import java.util.List;
 

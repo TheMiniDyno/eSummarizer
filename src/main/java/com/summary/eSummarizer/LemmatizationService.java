@@ -1,4 +1,4 @@
-package com.summary.NewsSummary;
+package com.summary.eSummarizer;
 
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
