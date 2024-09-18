@@ -9,4 +9,5 @@ public class eSummarizerApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(eSummarizerApplication.class, args);
 	}
+
 }
