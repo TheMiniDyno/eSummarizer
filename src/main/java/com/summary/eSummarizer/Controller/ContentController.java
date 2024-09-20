@@ -19,5 +19,7 @@ public class ContentController {
     public String home(){
         return "index";
     }
+    @GetMapping("/profile")
+    public String profile() {return "profile";}
     
 }

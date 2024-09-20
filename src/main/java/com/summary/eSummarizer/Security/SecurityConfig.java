@@ -51,7 +51,7 @@ public class SecurityConfig {
                 .formLogin(form -> form
                         .loginPage("/req/login")
                         .loginProcessingUrl("/req/login")
-                        .usernameParameter("email") // Use email instead of username for login
+                        .usernameParameter("email")
                         .defaultSuccessUrl("/index", true)
                         .failureUrl("/req/login?error=true")
                         .permitAll()
@@ -63,6 +63,7 @@ public class SecurityConfig {
                         .deleteCookies("JSESSIONID"))
                 .authorizeHttpRequests(registry -> {
                     registry.requestMatchers("/req/signup", "/css/**", "/js/**").permitAll();
+                    registry.requestMatchers("/api/profile/**").authenticated();
                     registry.anyRequest().authenticated();
                 })
                 .build();

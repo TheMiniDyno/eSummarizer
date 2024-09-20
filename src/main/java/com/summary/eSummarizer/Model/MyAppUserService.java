@@ -19,9 +19,26 @@ public class MyAppUserService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
         return User.builder()
-                .username(user.getEmail())  // Use email as the username for authentication
+                .username(user.getEmail())
                 .password(user.getPassword())
-                .roles("USER")  // Assign "USER" role
+                .roles("USER")
                 .build();
+    }
+
+    public MyAppUser findByEmail(String email) {
+        return repository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+    }
+
+    public void updateUsername(String email, String newUsername) {
+        MyAppUser user = findByEmail(email);
+        user.setUsername(newUsername);
+        repository.save(user);
+    }
+
+    public void updatePassword(String email, String newPassword) {
+        MyAppUser user = findByEmail(email);
+        user.setPassword(newPassword);
+        repository.save(user);
     }
 }
