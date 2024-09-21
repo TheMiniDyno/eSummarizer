@@ -1,5 +1,6 @@
-package com.summary.eSummarizer;
+package com.summary.eSummarizer.Preprocessor;
 
+import com.summary.eSummarizer.Service.LemmatizationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -41,22 +42,22 @@ public class Preprocessor {
         }
         return stopwords;
     }
-
+    // Method to tokenize the input text into sentences
     public List<String> tokenizeSentences(String text) {
         return Arrays.asList(text.split("(?<!\\w\\.\\w.)(?<![A-Z][a-z]\\.)(?<=\\.|\\?|\\!)\\s"));
     }
-
+    // Method to tokenize a single sentence into words
     public List<String> tokenizeWords(String sentence) {
         return Arrays.asList(sentence.toLowerCase().replaceAll("[^a-zA-Z0-9\\s]", "").split("\\s+"));
     }
-
+    // Method to remove stopwords and apply lemmatization on a list of sentences
     public List<String> removeStopwordsAndLemmatize(List<String> sentences) {
         return sentences.stream().map(sentence -> {
             List<String> words = tokenizeWords(sentence);
             return words.stream()
-                    .filter(word -> !STOPWORDS.contains(word))
-                    .map(lemmatizationService::lemmatize)
-                    .collect(Collectors.joining(" "));
+                    .filter(word -> !STOPWORDS.contains(word))  // Stopword removal
+                    .map(lemmatizationService::lemmatize)       // Lemmatization
+                    .collect(Collectors.joining(" "));  // Reconstruct sentence
         }).collect(Collectors.toList());
     }
 }

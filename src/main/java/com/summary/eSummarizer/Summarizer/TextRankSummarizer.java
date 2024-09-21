@@ -1,5 +1,6 @@
-package com.summary.eSummarizer;
+package com.summary.eSummarizer.Summarizer;
 
+import com.summary.eSummarizer.Preprocessor.Preprocessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.*;

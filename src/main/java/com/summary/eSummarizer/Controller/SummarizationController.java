@@ -1,5 +1,7 @@
-package com.summary.eSummarizer;
+package com.summary.eSummarizer.Controller;
 
+import com.summary.eSummarizer.Summarizer.SummaryInfo;
+import com.summary.eSummarizer.Summarizer.TextRankSummarizer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

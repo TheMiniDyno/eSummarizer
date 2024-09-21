@@ -1,5 +1,5 @@
 package com.summary.eSummarizer.service;
-import com.summary.eSummarizer.LemmatizationService;
+import com.summary.eSummarizer.Service.LemmatizationService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

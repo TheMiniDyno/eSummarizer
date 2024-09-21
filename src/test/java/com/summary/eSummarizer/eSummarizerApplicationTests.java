@@ -1,5 +1,7 @@
 package com.summary.eSummarizer;
 
+import com.summary.eSummarizer.Summarizer.SummaryInfo;
+import com.summary.eSummarizer.Summarizer.TextRankSummarizer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

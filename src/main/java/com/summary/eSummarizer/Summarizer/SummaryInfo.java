@@ -1,4 +1,4 @@
-package com.summary.eSummarizer;
+package com.summary.eSummarizer.Summarizer;
 
 import java.util.List;
 
