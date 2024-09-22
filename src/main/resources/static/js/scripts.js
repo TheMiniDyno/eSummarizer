@@ -42,12 +42,13 @@ async function summarizeText() {
         document.getElementById('summarizedWords').textContent = summaryInfo.summarizedWordCount;
         document.getElementById('reductionRate').textContent = (summaryInfo.reductionRate * 100).toFixed(2) + '%';
 
-        // Display ranking information with more decimal places
+        // Display ranking information with percentages
         const rankingList = document.getElementById('rankingList');
         rankingList.innerHTML = ''; // Clear existing content
         summaryInfo.sentenceRanks.forEach((sentenceRank, index) => {
             const li = document.createElement('li');
-            li.textContent = `${index + 1}. Rank: ${sentenceRank.rank.toFixed(6)} - "${sentenceRank.sentence}"`;
+            const percentageRank = (sentenceRank.rank * 100).toFixed(2); // Convert to percentage
+            li.textContent = `${index + 1}) ${percentageRank}% : ${sentenceRank.sentence}`;
             rankingList.appendChild(li);
         });
 
@@ -212,3 +213,4 @@ document.addEventListener('DOMContentLoaded', function () {
     const currentYear = new Date().getFullYear();
     yearSpan.textContent = currentYear;
 });
+

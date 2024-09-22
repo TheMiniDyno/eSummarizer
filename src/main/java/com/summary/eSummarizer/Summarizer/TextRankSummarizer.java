@@ -219,21 +219,43 @@ public class TextRankSummarizer {
 
     private Map<String, Double> incorporatePositionBias(Map<String, Double> scores, List<String> sentences) {
         double totalSentences = sentences.size();
+        Map<String, Double> biasedScores = new HashMap<>();
+        double maxScore = 0.0;
+
         for (int i = 0; i < sentences.size(); i++) {
             String sentence = sentences.get(i);
             double positionBias = (totalSentences - i) / totalSentences; // Higher bias for earlier sentences
-            scores.put(sentence, scores.get(sentence) + positionBias);
+            double newScore = scores.get(sentence) + positionBias;
+            biasedScores.put(sentence, newScore);
+            maxScore = Math.max(maxScore, newScore);
         }
-        return scores;
+
+        // Normalize scores
+        for (Map.Entry<String, Double> entry : biasedScores.entrySet()) {
+            biasedScores.put(entry.getKey(), entry.getValue() / maxScore);
+        }
+
+        return biasedScores;
     }
 
     private Map<String, Double> adjustForSentenceLength(Map<String, Double> scores, List<String> sentences) {
+        Map<String, Double> adjustedScores = new HashMap<>();
+        double maxScore = 0.0;
+
         for (int i = 0; i < sentences.size(); i++) {
             String sentence = sentences.get(i);
             double lengthFactor = Math.log(sentence.split("\\s+").length + 1);
-            scores.put(sentence, scores.get(sentence) * lengthFactor);
+            double newScore = scores.get(sentence) * lengthFactor;
+            adjustedScores.put(sentence, newScore);
+            maxScore = Math.max(maxScore, newScore);
         }
-        return scores;
+
+        // Normalize scores
+        for (Map.Entry<String, Double> entry : adjustedScores.entrySet()) {
+            adjustedScores.put(entry.getKey(), entry.getValue() / maxScore);
+        }
+
+        return adjustedScores;
     }
 
     private List<String> selectTopSentences(Map<String, Double> scores, int numSentences, List<String> originalSentences, List<String> processedSentences) {
