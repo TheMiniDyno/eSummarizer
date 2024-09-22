@@ -112,20 +112,22 @@ function clearAll() {
 
 // Function to create a force-directed graph
 function createForceGraph(nodes, links) {
-    const width = document.getElementById('graph').clientWidth;
-    const height = 400;
-
     // Clear existing SVG
     d3.select("#graph").selectAll("*").remove();
 
+    const container = document.getElementById('graph');
+    const width = container.clientWidth;
+    const height = container.clientHeight || 400; // Use container's height if available, otherwise default to 400
+
     const svg = d3.select("#graph")
         .append("svg")
-        .attr("width", width)
-        .attr("height", height);
+        .attr("width", "100%")
+        .attr("height", "100%")
+        .attr("viewBox", [0, 0, width, height]);
 
     const simulation = d3.forceSimulation(nodes)
-        .force("link", d3.forceLink(links).id(d => d.id).strength(1)) // Updated strength
-        .force("charge", d3.forceManyBody().strength(-50))
+        .force("link", d3.forceLink(links).id(d => d.id))
+        .force("charge", d3.forceManyBody().strength(-30))
         .force("center", d3.forceCenter(width / 2, height / 2));
 
     const link = svg.append("g")
@@ -142,8 +144,7 @@ function createForceGraph(nodes, links) {
         .data(nodes)
         .join("circle")
         .attr("r", 5)
-        .attr("fill", d => d3.interpolateViridis(d.rank))
-        .call(drag(simulation));
+        .attr("fill", d => d3.interpolateViridis(d.rank));
 
     const label = svg.append("g")
         .selectAll("text")
@@ -152,8 +153,7 @@ function createForceGraph(nodes, links) {
         .text(d => d.id)
         .attr("font-size", "10px")
         .attr("dx", 8)
-        .attr("dy", 3)
-        .attr("fill", "white");
+        .attr("dy", 3);
 
     simulation.on("tick", () => {
         link
@@ -170,31 +170,8 @@ function createForceGraph(nodes, links) {
             .attr("x", d => d.x)
             .attr("y", d => d.y);
     });
-
-    function drag(simulation) {
-        function dragstarted(event) {
-            if (!event.active) simulation.alphaTarget(0.3).restart();
-            event.subject.fx = event.subject.x;
-            event.subject.fy = event.subject.y;
-        }
-
-        function dragged(event) {
-            event.subject.fx = event.x;
-            event.subject.fy = event.y;
-        }
-
-        function dragended(event) {
-            if (!event.active) simulation.alphaTarget(0);
-            event.subject.fx = null;
-            event.subject.fy = null;
-        }
-
-        return d3.drag()
-            .on("start", dragstarted)
-            .on("drag", dragged)
-            .on("end", dragended);
-    }
 }
+
 
 document.getElementById('logoutButton').addEventListener('click', function() {
     fetch('/logout', {
