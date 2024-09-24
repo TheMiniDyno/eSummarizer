@@ -172,22 +172,9 @@ function createForceGraph(nodes, links) {
     });
 }
 
-
-document.getElementById('logoutButton').addEventListener('click', function() {
-    fetch('/logout', {
-        method: 'POST',
-        credentials: 'same-origin'
-    }).then(() => {
-        window.location.href = '/login';
-    }).catch(error => {
-        console.error('Logout failed:', error);
-    });
-});
-
 // Footer year update
 document.addEventListener('DOMContentLoaded', function () {
     const yearSpan = document.getElementById('year');
     const currentYear = new Date().getFullYear();
     yearSpan.textContent = currentYear;
 });
-

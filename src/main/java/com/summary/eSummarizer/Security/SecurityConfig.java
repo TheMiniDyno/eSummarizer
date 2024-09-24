@@ -49,23 +49,25 @@ public class SecurityConfig {
         return httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(form -> form
-                        .loginPage("/req/login")
+                        .loginPage("/req/login")  // Custom login page
                         .loginProcessingUrl("/req/login")
                         .usernameParameter("email")
-                        .defaultSuccessUrl("/index", true)
+                        .defaultSuccessUrl("/index", true)  // Redirect to home page after login
                         .failureUrl("/req/login?error=true")
                         .permitAll()
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/req/login?logout")
+                        .logoutSuccessUrl("/index?logout")
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID"))
                 .authorizeHttpRequests(registry -> {
-                    registry.requestMatchers("/req/signup", "/css/**", "/js/**").permitAll();
-                    registry.requestMatchers("/api/profile/**").authenticated();
-                    registry.anyRequest().authenticated();
+                    registry.requestMatchers("/", "/index", "/index.html", "/req/signup", "/css/**", "/js/**").permitAll(); // Public access to index and resources
+                    registry.requestMatchers("/summarize").permitAll();  // Summarization accessible to anonymous users
+                    registry.requestMatchers("/api/profile/**").authenticated();  // Profile API requires authentication
+                    registry.anyRequest().authenticated();  // All other requests need authentication
                 })
                 .build();
     }
+
 }
