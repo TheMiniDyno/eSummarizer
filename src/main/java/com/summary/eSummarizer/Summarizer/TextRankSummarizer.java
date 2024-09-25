@@ -88,7 +88,7 @@ public class TextRankSummarizer {
     }
 
     private int determineSummaryLength(int numSentencesInText) {
-        return Math.max(1, (int) Math.ceil(numSentencesInText * 0.5));// result is total*0.5 i.e half
+        return Math.max(1, (int) Math.ceil(numSentencesInText * 0.6));// result is total*
     }
 
     private double determineDynamicThreshold(List<String> sentences, Map<String, Map<String, Double>> tfidfVectors) {
