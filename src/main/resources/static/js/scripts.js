@@ -61,7 +61,7 @@ async function summarizeText() {
 
     } catch (error) {
         console.error('Error:', error);
-        alert('An error occurred while summarizing the text. Please try again.');
+        alert('Login to summarize more than 200 words.');
     }
 }
 

@@ -30,6 +30,11 @@ public class MyAppUserService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
     }
 
+    public MyAppUser findByUsername(String username) {
+        return repository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+    }
+
     public void updateUsername(String email, String newUsername) {
         MyAppUser user = findByEmail(email);
         user.setUsername(newUsername);

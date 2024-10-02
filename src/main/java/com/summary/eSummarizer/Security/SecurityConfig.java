@@ -62,7 +62,7 @@ public class SecurityConfig {
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID"))
                 .authorizeHttpRequests(registry -> {
-                    registry.requestMatchers("/", "/index", "/index.html", "/req/signup", "/css/**", "/js/**").permitAll(); // Public access to index and resources
+                    registry.requestMatchers("/", "/index", "/index.html","/req/password-reset","/reset", "/req/signup", "/css/**", "/js/**").permitAll(); // Public access to index and resources
                     registry.requestMatchers("/summarize").permitAll();  // Summarization accessible to anonymous users
                     registry.requestMatchers("/api/profile/**").authenticated();  // Profile API requires authentication
                     registry.anyRequest().authenticated();  // All other requests need authentication
