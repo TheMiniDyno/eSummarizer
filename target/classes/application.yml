@@ -1,46 +1,18 @@
-# Logging configuration
-logging:
-  level:
-    com.summary.eSummarizer.Service: DEBUG
-    org.springframework.web: DEBUG  # Add Spring Web logging
-    org.thymeleaf: DEBUG  # Add Thymeleaf logging
-    org.hibernate.SQL: DEBUG  # For detailed SQL logging
-
-# Server configuration
 server:
   error:
     include-message: always
     include-binding-errors: always
-    include-stacktrace: always  # Include stack traces in error responses
-    whitelabel:
-      enabled: false  # Disable whitelabel error page
 
 spring:
-  # Existing datasource configuration
   datasource:
-    password: root
-    url: jdbc:postgresql://localhost:5432/registration
-    username: postgres
-
-  # Existing JPA configuration
+    password:
+    url: jdbc:mysql://localhost:3306/registration
+    username: root
   jpa:
     hibernate:
       ddl-auto: update
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+        dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
     show-sql: true
-
-  # Add Thymeleaf configuration
-  thymeleaf:
-    prefix: classpath:/templates/
-    suffix: .html
-    cache: false  # Disable cache for development
-
-  # Add devtools for hot reloading (optional, but helpful for development)
-  devtools:
-    restart:
-      enabled: true
-    livereload:
-      enabled: true
