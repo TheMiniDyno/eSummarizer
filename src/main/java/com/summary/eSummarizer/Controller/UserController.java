@@ -7,7 +7,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
-public class ContentController {
+public class UserController {
 
     @GetMapping("/req/login")
     public String login(){

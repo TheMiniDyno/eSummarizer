@@ -19,10 +19,10 @@ async function summarizeText() {
             },
             body: text
         });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+    if(response.status === 401){
+        alert("Login to summarize more than 200 words.");
+        window.location.href = '/';
+    }
 
         const summaryInfo = await response.json();
 
@@ -61,7 +61,6 @@ async function summarizeText() {
 
     } catch (error) {
         console.error('Error:', error);
-        alert('An error occurred while summarizing the text. Please try again.');
     }
 }
 
