@@ -14,7 +14,7 @@
 	<name>eSummarizer</name> <!-- Keep "demo" or change to "NewsSummary" as needed -->
 	<description>Demo project with News Summary features</description> <!-- Combined descriptions -->
 	<properties>
-		<java.version>17</java.version> <!-- Using Java 17 from the first file -->
+		<java.version>22</java.version> <!-- Using Java 17 from the first file -->
 	</properties>
 	<dependencies>
 		<!-- Spring Boot Starter Data JPA -->
