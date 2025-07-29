@@ -1,0 +1,38 @@
+# === IntelliJ IDEA ===
+.idea/
+*.iml
+*.iws
+out/
+
+# === VS Code ===
+.vscode/
+
+# === Java build artifacts ===
+*.class
+*.jar
+*.war
+*.ear
+
+# === Maven ===
+/target
+
+# === Logs ===
+*.log
+logs/
+*.log.*
+
+# === OS / Environment files ===
+.DS_Store          # macOS
+Thumbs.db          # Windows
+ehthumbs.db
+Desktop.ini
+
+# === Other temporary files ===
+*.swp
+*.tmp
+*.bak
+*.old
+
+# === Environment config ===
+.env
+.env.*
