@@ -18,7 +18,7 @@
   </a>
   <div>
     <a href="/profile"><button class="navButton">Profile</button></a>
-    <a th:if="${!isAuthenticated}" href="/req/login"><button class="navButton">Login</button></a>
+    <a th:if="${!isAuthenticated}" href="/login"><button class="navButton">Login</button></a>
     <form th:if="${isAuthenticated}" th:action="@{/logout}" method="post" style="display: inline;">
       <button type="submit" class="navButton">Logout</button>
     </form>

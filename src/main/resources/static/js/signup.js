@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const jsonData = JSON.stringify(data);
 
         // Make the POST request to the server
-        fetch('/req/signup', {
+        fetch('/signup', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(data => {
                 // Handle success - navigate to login page
                 alert('Registration successful!');
-                window.location.href = '/req/login';
+                window.location.href = '/login';
             })
             .catch(error => {
                 // Handle failure

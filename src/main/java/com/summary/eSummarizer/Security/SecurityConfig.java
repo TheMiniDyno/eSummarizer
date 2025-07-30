@@ -49,11 +49,11 @@ public class SecurityConfig {
         return httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(form -> form
-                        .loginPage("/req/login")  // Custom login page
-                        .loginProcessingUrl("/req/login")
+                        .loginPage("/login")  // Custom login page
+                        .loginProcessingUrl("/login")
                         .usernameParameter("email")
                         .defaultSuccessUrl("/index", true)  // Redirect to home page after login
-                        .failureUrl("/req/login?error=true")
+                        .failureUrl("/login?error=true")
                         .permitAll()
                 )
                 .logout(logout -> logout
@@ -62,7 +62,7 @@ public class SecurityConfig {
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID"))
                 .authorizeHttpRequests(registry -> {
-                    registry.requestMatchers("/", "/index", "/index.html","/req/password-reset","/reset", "/req/signup", "/css/**", "/js/**").permitAll(); // Public access to index and resources
+                    registry.requestMatchers("/", "/index", "/index.html", "/signup", "/css/**", "/js/**").permitAll(); // Public access to index and resources
                     registry.requestMatchers("/summarize").permitAll();  // Summarization accessible to anonymous users
                     registry.requestMatchers("/api/profile/**").authenticated();  // Profile API requires authentication
                     registry.anyRequest().authenticated();  // All other requests need authentication

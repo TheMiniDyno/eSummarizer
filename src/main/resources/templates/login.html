@@ -12,7 +12,7 @@
 
 
 <section>
-    <form action="/req/login" method="post">
+    <form action="/login" method="post">
         <h1>Login</h1>
         <div class="dialog-row">
             <label th:if="${param.error}" th:text="${session['SPRING_SECURITY_LAST_EXCEPTION'].message}" class="text-center redText"></label>
@@ -29,12 +29,10 @@
         </div>
         <div class="register">
             <p><a href="/index">Stay logged out</a></p>
-            <p><a href="/req/password-reset">Forgot Password?</a></p>
         </div>
         <button>Log in</button>
         <div class="register">
-            <p>Don't have an account ?<a href="/req/signup"> Register!!</a></p>
-
+            <p>Don't have an account ?<a href="/signup"> Register!!</a></p>
         </div>
     </form>
 
