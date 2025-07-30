@@ -1,5 +1,6 @@
-package com.summary.eSummarizer.Model;
+package com.summary.eSummarizer.Service;
 
+import com.summary.eSummarizer.Model.UserModel;
 import com.summary.eSummarizer.Repository.MyAppUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
@@ -16,7 +17,7 @@ public class MyAppUserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        MyAppUser user = repository.findByEmail(email)
+        UserModel user = repository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
         return User.builder()
@@ -26,24 +27,24 @@ public class MyAppUserService implements UserDetailsService {
                 .build();
     }
 
-    public MyAppUser findByEmail(String email) {
+    public UserModel findByEmail(String email) {
         return repository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
     }
 
-    public MyAppUser findByUsername(String username) {
+    public UserModel findByUsername(String username) {
         return repository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
     }
 
     public void updateUsername(String email, String newUsername) {
-        MyAppUser user = findByEmail(email);
+        UserModel user = findByEmail(email);
         user.setUsername(newUsername);
         repository.save(user);
     }
 
     public void updatePassword(String email, String newPassword) {
-        MyAppUser user = findByEmail(email);
+        UserModel user = findByEmail(email);
         user.setPassword(newPassword);
         repository.save(user);
     }

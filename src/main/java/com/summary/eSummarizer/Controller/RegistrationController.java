@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.summary.eSummarizer.Model.MyAppUser;
+import com.summary.eSummarizer.Model.UserModel;
 import com.summary.eSummarizer.Repository.MyAppUserRepository;
 
 @RestController
@@ -21,7 +21,7 @@ public class RegistrationController {
     private PasswordEncoder passwordEncoder;
 
     @PostMapping(value = "/signup", consumes = "application/json")
-    public ResponseEntity<?> createUser(@RequestBody MyAppUser user) {
+    public ResponseEntity<?> createUser(@RequestBody UserModel user) {
         // Check if email already exists
         if (myAppUserRepository.findByEmail(user.getEmail()).isPresent()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -36,7 +36,7 @@ public class RegistrationController {
 
         // Encrypt the password and save the user
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        MyAppUser savedUser = myAppUserRepository.save(user);
+        UserModel savedUser = myAppUserRepository.save(user);
         return ResponseEntity.ok(savedUser);
     }
 }

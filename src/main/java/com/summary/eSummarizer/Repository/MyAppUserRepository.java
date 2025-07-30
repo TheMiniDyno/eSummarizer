@@ -2,14 +2,14 @@ package com.summary.eSummarizer.Repository;
 
 import java.util.Optional;
 
-import com.summary.eSummarizer.Model.MyAppUser;
+import com.summary.eSummarizer.Model.UserModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface MyAppUserRepository extends JpaRepository<MyAppUser, Long> {
+public interface MyAppUserRepository extends JpaRepository<UserModel, Long> {
 
-    Optional<MyAppUser> findByUsername(String username);
+    Optional<UserModel> findByUsername(String username);
 
-    Optional<MyAppUser> findByEmail(String email);
+    Optional<UserModel> findByEmail(String email);
 }

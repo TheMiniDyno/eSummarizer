@@ -13,7 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
-import com.summary.eSummarizer.Model.MyAppUserService;
+import com.summary.eSummarizer.Service.MyAppUserService;
 
 @Configuration
 @EnableWebSecurity

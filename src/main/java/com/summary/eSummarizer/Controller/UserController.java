@@ -1,7 +1,7 @@
 package com.summary.eSummarizer.Controller;
 
-import com.summary.eSummarizer.Model.MyAppUser;
-import com.summary.eSummarizer.Model.MyAppUserService;
+import com.summary.eSummarizer.Model.UserModel;
+import com.summary.eSummarizer.Service.MyAppUserService;
 import com.summary.eSummarizer.Service.UserOperationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,9 +20,9 @@ public class UserController {
     private UserOperationService userOperationService;
 
     @GetMapping
-    public ResponseEntity<MyAppUser> getUserProfile() {
+    public ResponseEntity<UserModel> getUserProfile() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        MyAppUser user = userService.findByEmail(auth.getName());
+        UserModel user = userService.findByEmail(auth.getName());
         return ResponseEntity.ok(user);
     }
 

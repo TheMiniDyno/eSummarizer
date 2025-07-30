@@ -1,7 +1,6 @@
 package com.summary.eSummarizer.Service;
 
-import com.summary.eSummarizer.Model.MyAppUser;
-import com.summary.eSummarizer.Model.MyAppUserService;
+import com.summary.eSummarizer.Model.UserModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +19,7 @@ public class UserOperationService {
     private PasswordEncoder passwordEncoder;
 
     public void changePassword(String email, String oldPassword, String newPassword) {
-        MyAppUser user = userService.findByEmail(email);
+        UserModel user = userService.findByEmail(email);
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
             throw new IllegalArgumentException("Invalid old password");
         }
