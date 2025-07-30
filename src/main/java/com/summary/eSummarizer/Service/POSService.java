@@ -19,7 +19,7 @@ public class POSService {
     }
 
     private Map<String, String> loadPOSDictionary() {
-        return csvLoaderService.loadAsKeyValue("pos_dictionary.csv");
+        return csvLoaderService.loadAsKeyValue("/CSV/pos_dictionary.csv");
     }
 
     public String getPartOfSpeech(String word) {

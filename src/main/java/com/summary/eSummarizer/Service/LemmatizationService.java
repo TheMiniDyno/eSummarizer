@@ -19,7 +19,7 @@ public class LemmatizationService {
     }
 
     private Map<String, String> loadDictionary() {
-        return csvLoaderService.loadAsKeyValue("lemmatization_dictionary.csv");
+        return csvLoaderService.loadAsKeyValue("/CSV/lemmatization_dictionary.csv");
     }
 
     public String lemmatize(String word) {

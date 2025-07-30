@@ -29,7 +29,7 @@ public class Preprocessor {
 
     public Preprocessor(CSVLoaderService csvLoaderService) {
         this.csvLoaderService = csvLoaderService;
-        STOPWORDS = loadStopwordsFromCsv("stopwords.csv");
+        STOPWORDS = loadStopwordsFromCsv("/CSV/stopwords.csv");
     }
 
     private Set<String> loadStopwordsFromCsv(String filename) {
