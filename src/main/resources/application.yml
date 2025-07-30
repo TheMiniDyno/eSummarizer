@@ -1,13 +1,14 @@
 server:
+  port: 8080
   error:
     include-message: always
     include-binding-errors: always
 
 spring:
   datasource:
-    password:
     url: jdbc:mysql://localhost:3306/gistify
     username: root
+    password:
   jpa:
     hibernate:
       ddl-auto: update
