@@ -1,7 +1,8 @@
-package com.summary.eSummarizer.Model;
+package com.summary.eSummarizer.Repository;
 
 import java.util.Optional;
 
+import com.summary.eSummarizer.Model.MyAppUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

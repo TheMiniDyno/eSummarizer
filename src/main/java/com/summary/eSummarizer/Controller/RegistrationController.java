@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.summary.eSummarizer.Model.MyAppUser;
-import com.summary.eSummarizer.Model.MyAppUserRepository;
+import com.summary.eSummarizer.Repository.MyAppUserRepository;
 
 @RestController
 public class RegistrationController {
