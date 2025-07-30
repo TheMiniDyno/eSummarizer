@@ -20,7 +20,7 @@ public class RegistrationController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @PostMapping(value = "/req/signup", consumes = "application/json")
+    @PostMapping(value = "/signup", consumes = "application/json")
     public ResponseEntity<?> createUser(@RequestBody MyAppUser user) {
         // Check if email already exists
         if (myAppUserRepository.findByEmail(user.getEmail()).isPresent()) {
