@@ -1,16 +1,13 @@
 package com.summary.eSummarizer.Preprocessor;
 
+import com.summary.eSummarizer.Service.CSVLoaderService;
 import com.summary.eSummarizer.Service.LemmatizationService;
 import com.summary.eSummarizer.Service.POSService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,41 +24,28 @@ public class Preprocessor {
     @Autowired
     private POSService posService;
 
-    public Preprocessor() {
+    @Autowired
+    private CSVLoaderService csvLoaderService;
+
+    public Preprocessor(CSVLoaderService csvLoaderService) {
+        this.csvLoaderService = csvLoaderService;
         STOPWORDS = loadStopwordsFromCsv("stopwords.csv");
     }
 
     private Set<String> loadStopwordsFromCsv(String filename) {
-        Set<String> stopwords = new HashSet<>();
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(new ClassPathResource(filename).getInputStream()))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] words = line.split(",");
-                for (String word : words) {
-                    if (!word.isEmpty()) {
-                        stopwords.add(word.trim());
-                    }
-                }
-            }
-        } catch (IOException e) {
-            System.err.println("Error loading stopwords: " + e.getMessage());
-            // throw a custom exception here
-        }
-        return stopwords;
+        return csvLoaderService.loadAsSet(filename);
     }
-
-    // Method to tokenize the input text into sentences
+    //Tokenize sentences into sentence
     public List<String> tokenizeSentences(String text) {
         return Arrays.asList(text.split("(?<!\\w\\.\\w.)(?<![A-Z][a-z]\\.)(?<=\\.|\\?|\\!)\\s"));
     }
 
-    // Method to tokenize a single sentence into words
+    //Tokenize a sentence into words
     public List<String> tokenizeWords(String sentence) {
         return Arrays.asList(sentence.toLowerCase().replaceAll("[^a-zA-Z0-9\\s]", "").split("\\s+"));
     }
 
-    // Method to remove stopwords and apply lemmatization on a list of sentences
+    //Remove stopwords and apply lemmatization on a list of sentences
     public List<String> removeStopwordsAndLemmatize(List<String> sentences) {
         // Use an array to hold the counts
         final int[] stopwordCount = {0}; // Array to hold the number of stopwords removed
@@ -91,9 +75,8 @@ public class Preprocessor {
         return processed; // Return processed sentences
     }
 
-    // New method to tag parts of speech (POS) for each word in the sentences
+    // method to tag parts of speech (POS) for each word in the sentences
     public List<List<String>> tagPartsOfSpeech(List<String> sentences) {
-        // Use an array to hold the count of tagged words
         final int[] taggedWordCount = {0}; // Array to hold the total tagged words
 
         List<List<String>> taggedSentences = sentences.stream().map(sentence -> {
