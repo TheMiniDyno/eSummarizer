@@ -1,4 +1,4 @@
-package com.summary.eSummarizer.Summarizer;
+package com.summary.eSummarizer.DTO;
 
 import java.util.List;
 
@@ -23,8 +23,7 @@ public class SummaryInfo {
         this.reductionRate = reductionRate;
     }
 
-    // Getters and Setters for existing fields
-
+    // Getters and Setters
     public void setSentenceRanks(List<SentenceRank> sentenceRanks) {
         this.sentenceRanks = sentenceRanks;
     }
@@ -57,8 +56,6 @@ public class SummaryInfo {
         return reductionRate;
     }
 
-    // Getters and Setters for graph data
-
     public void setGraphData(List<GraphNode> nodes, List<GraphLink> links) {
         this.graphNodes = nodes;
         this.graphLinks = links;
@@ -70,59 +67,5 @@ public class SummaryInfo {
 
     public List<GraphLink> getGraphLinks() {
         return graphLinks;
-    }
-}
-
-class SentenceRank {
-    private String sentence;
-    private double rank;
-
-    public SentenceRank(String sentence, double rank) {
-        this.sentence = sentence;
-        this.rank = rank;
-    }
-
-    public String getSentence() {
-        return sentence;
-    }
-
-    public double getRank() {
-        return rank;
-    }
-}
-
-class GraphNode {
-    private int id;
-    private double rank;
-
-    public GraphNode(int id, double rank) {
-        this.id = id;
-        this.rank = rank;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public double getRank() {
-        return rank;
-    }
-}
-
-class GraphLink {
-    private int source;
-    private int target;
-
-    public GraphLink(int source, int target) {
-        this.source = source;
-        this.target = target;
-    }
-
-    public int getSource() {
-        return source;
-    }
-
-    public int getTarget() {
-        return target;
     }
 }

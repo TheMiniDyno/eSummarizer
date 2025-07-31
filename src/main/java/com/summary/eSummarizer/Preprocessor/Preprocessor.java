@@ -1,6 +1,6 @@
 package com.summary.eSummarizer.Preprocessor;
 
-import com.summary.eSummarizer.Service.CSVLoaderService;
+import com.summary.eSummarizer.Utils.CSVLoaderService;
 import com.summary.eSummarizer.Service.LemmatizationService;
 import com.summary.eSummarizer.Service.POSService;
 import opennlp.tools.sentdetect.SentenceDetectorME;
@@ -38,35 +38,9 @@ public class Preprocessor {
     public Preprocessor(CSVLoaderService csvLoaderService) {
         this.csvLoaderService = csvLoaderService;
         STOPWORDS = loadStopwordsFromCsv("/CSV/stopwords.csv");
-
-        // Debug: Find where models are actually located
-        debugModelPaths();
-
         // OpenNLP models
         this.sentenceDetector = loadSentenceDetector();
         this.tokenizer = loadTokenizer();
-    }
-
-    private void debugModelPaths() {
-        logger.info("=== Debugging OpenNLP Model Paths ===");
-        String[] possiblePaths = {
-                "/models/openNLP/en-sent.bin",
-                "/models/openNLP/en-token.bin"
-        };
-
-        for (String path : possiblePaths) {
-            InputStream stream = getClass().getResourceAsStream(path);
-            if (stream != null) {
-                logger.info("✓ FOUND model at: {}", path);
-                try {
-                    stream.close();
-                } catch (Exception e) {
-                }
-            } else {
-                logger.info("✗ NOT found at: {}", path);
-            }
-        }
-        logger.info("=== End Debug ===");
     }
 
     private SentenceDetectorME loadSentenceDetector() {
@@ -87,9 +61,9 @@ public class Preprocessor {
         try (InputStream modelIn = getClass().getResourceAsStream("/models/openNLP/en-token.bin")) {
             if (modelIn == null) {
                 throw new RuntimeException(
-                        "Tokenizer model not found at /models/opennlp-en-ud-ewt-tokens-1.3-2.5.4.bin");
+                        "Tokenizer model not found at /models/openNLP/en-token.bin");
             }
-            logger.info("✓ Loading tokenizer from: /models/opennlp-en-ud-ewt-tokens-1.3-2.5.4.bin");
+            logger.info("✓ Loading tokenizer from: /models/openNLP/en-token.bin");
             TokenizerModel model = new TokenizerModel(modelIn);
             return new TokenizerME(model);
         } catch (IOException e) {
@@ -116,7 +90,7 @@ public class Preprocessor {
         return sentenceList;
     }
 
-    // Enhanced word tokenization using OpenNLP
+    // tokenization using OpenNLP
     public List<String> tokenizeWords(String sentence) {
         String[] tokens = tokenizer.tokenize(sentence);
         List<String> wordList = Arrays.stream(tokens)
@@ -138,10 +112,10 @@ public class Preprocessor {
         logger.info("=== Starting Stopword Removal and Lemmatization ===");
         logger.info("Input sentences count: {}", sentences.size());
 
-        // Use an array to hold the counts
-        final int[] stopwordCount = { 0 }; // Array to hold the number of stopwords removed
-        final int[] lemmatizedCount = { 0 }; // Array to hold the total lemmatized words
-        final int[] sentenceIndex = { 0 }; // Track sentence index
+        // array to hold the counts
+        final int[] stopwordCount = { 0 };
+        final int[] lemmatizedCount = { 0 };
+        final int[] sentenceIndex = { 0 };
 
         List<String> processed = sentences.stream().map(sentence -> {
             boolean isFirstSentence = sentenceIndex[0] == 0;
@@ -160,7 +134,7 @@ public class Preprocessor {
                     .filter(word -> {
                         boolean isStopword = STOPWORDS.contains(word);
                         if (isStopword) {
-                            stopwordCount[0]++; // Increment stopword count
+                            stopwordCount[0]++;
                             if (isFirstSentence) {
                                 logger.debug("Removed stopword: {}", word);
                             }
@@ -200,7 +174,7 @@ public class Preprocessor {
         logger.info("Total lemmatized words: {}", lemmatizedCount[0]);
         logger.info("=== End Stopword Removal and Lemmatization ===");
 
-        return processed; // Return processed sentences
+        return processed;
     }
 
     // method to tag parts of speech (POS) for each word in the sentences
@@ -208,7 +182,7 @@ public class Preprocessor {
         logger.info("=== Starting POS Tagging ===");
         logger.info("Input sentences count: {}", sentences.size());
 
-        final int[] taggedWordCount = { 0 }; // Array to hold the total tagged words
+        final int[] taggedWordCount = { 0 }; // hold the total tagged words
 
         List<List<String>> taggedSentences = sentences.stream().map(sentence -> {
             logger.info("POS tagging sentence: {}", sentence);
@@ -218,7 +192,7 @@ public class Preprocessor {
                     .map(word -> {
                         String pos = posService.getPartOfSpeech(word);
                         String taggedWord = word + "|" + pos; // Tag word with POS
-                        taggedWordCount[0]++; // Increment tagged words count
+                        taggedWordCount[0]++;
                         logger.debug("POS tagged: {} -> {}", word, taggedWord);
                         return taggedWord;
                     })

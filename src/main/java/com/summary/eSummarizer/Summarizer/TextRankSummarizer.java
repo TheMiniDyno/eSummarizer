@@ -1,5 +1,9 @@
 package com.summary.eSummarizer.Summarizer;
 
+import com.summary.eSummarizer.DTO.GraphLink;
+import com.summary.eSummarizer.DTO.GraphNode;
+import com.summary.eSummarizer.DTO.SentenceRank;
+import com.summary.eSummarizer.DTO.SummaryInfo;
 import com.summary.eSummarizer.Preprocessor.Preprocessor;
 import com.summary.eSummarizer.Service.POSService;
 import org.springframework.beans.factory.annotation.Autowired;

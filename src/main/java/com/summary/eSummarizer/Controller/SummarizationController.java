@@ -1,6 +1,6 @@
 package com.summary.eSummarizer.Controller;
 
-import com.summary.eSummarizer.Summarizer.SummaryInfo;
+import com.summary.eSummarizer.DTO.SummaryInfo;
 import com.summary.eSummarizer.Summarizer.TextRankSummarizer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
