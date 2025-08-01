@@ -6,32 +6,66 @@ import java.util.*;
 @Component
 public class SentenceScorer {
 
+    // Configuration constants
+    private static final double POSITION_BIAS_STRENGTH = 0.3;
+    private static final int OPTIMAL_SENTENCE_LENGTH = 20;
+    private static final int MAX_SENTENCE_LENGTH = 40;
+    private static final double POS_BOOST_FACTOR = 0.4;
+    private static final double MAX_SCORE_MULTIPLIER = 2.0;
+
     private static final Map<String, Double> POS_WEIGHTS;
 
     static {
         Map<String, Double> weights = new HashMap<>();
-        weights.put("NN", 1.2); // Noun - high importance
-        weights.put("NNS", 1.2); // Plural noun
-        weights.put("NNP", 1.5); // Proper noun - highest importance (names, places)
-        weights.put("NNPS", 1.5); // Plural proper noun
-        weights.put("VB", 1.0); // Verb - medium importance
-        weights.put("VBD", 1.0); // Past tense verb
-        weights.put("VBG", 1.0); // Gerund
-        weights.put("VBN", 1.0); // Past participle
-        weights.put("VBP", 1.0); // Present tense verb
-        weights.put("VBZ", 1.0); // 3rd person singular present
-        weights.put("JJ", 0.8); // Adjective - lower importance
-        weights.put("JJR", 0.8); // Comparative adjective
-        weights.put("JJS", 0.8); // Superlative adjective
-        weights.put("CD", 1.1); // Cardinal number - often important facts
+
+        // Nouns - very important
+        weights.put("NOUN", 1.3); // Replaces NN, NNS
+        weights.put("PROPN", 1.6); // Replaces NNP, NNPS
+
+        // Verbs - important
+        weights.put("VERB", 1.1); // Replaces VB, VBD, VBG, VBN, VBP, VBZ
+        weights.put("AUX", 0.8); // Auxiliary verbs
+
+        // Adjectives - moderate
+        weights.put("ADJ", 0.9); // Replaces JJ, JJR, JJS
+
+        // Numbers and quantities - important
+        weights.put("NUM", 1.2); // Replaces CD
+
+        // Adverbs - low importance
+        weights.put("ADV", 0.7); // Replaces RB, RBR, RBS
+
+        // Function words - low importance
+        weights.put("DET", 0.3); // Replaces DT (Determiners)
+        weights.put("ADP", 0.4); // Replaces IN (Prepositions)
+        weights.put("CCONJ", 0.3); // Replaces CC (Coordinating conjunctions)
+        weights.put("SCONJ", 0.3); // Subordinating conjunctions
+        weights.put("PART", 0.3); // Replaces TO ("to")
+
+        // Pronouns - low importance
+        weights.put("PRON", 0.4); // Pronouns
+
+        // Other tags you might encounter
+        weights.put("INTJ", 0.8); // Interjections
+        weights.put("SYM", 0.5); // Symbols
+        weights.put("X", 0.2); // Other/Unknown
+
+        // Punctuation - no importance
+        weights.put("PUNCT", 0.0); // Punctuation
+
         POS_WEIGHTS = Collections.unmodifiableMap(weights);
     }
 
+    // Cache for word counts to avoid repeated splits
+    private final Map<String, Integer> wordCountCache = new HashMap<>();
+
     public Map<String, Double> incorporatePositionBias(Map<String, Double> scores, List<String> sentences) {
         Map<String, Double> adjustedScores = new HashMap<>(scores);
+
         for (int i = 0; i < sentences.size(); i++) {
             String sentence = sentences.get(i);
-            double positionBias = 1.0 - ((double) i / sentences.size());
+            // Exponential decay rather than linear
+            double positionBias = 1.0 - (POSITION_BIAS_STRENGTH * Math.pow((double) i / sentences.size(), 2));
             adjustedScores.put(sentence, adjustedScores.get(sentence) * positionBias);
         }
         return adjustedScores;
@@ -39,25 +73,42 @@ public class SentenceScorer {
 
     public Map<String, Double> adjustForSentenceLength(Map<String, Double> scores, List<String> sentences) {
         Map<String, Double> adjustedScores = new HashMap<>(scores);
+
         for (String sentence : sentences) {
-            double lengthBias = 1.0 - ((double) sentence.split("\\s+").length / 30);
+            int wordCount = getWordCount(sentence);
+            double lengthBias = calculateLengthBias(wordCount);
             adjustedScores.put(sentence, adjustedScores.get(sentence) * lengthBias);
         }
         return adjustedScores;
     }
 
-    // POS-based scoring
+    private int getWordCount(String sentence) {
+        return wordCountCache.computeIfAbsent(sentence,
+                s -> s.trim().split("\\s+").length);
+    }
+
+    private double calculateLengthBias(int wordCount) {
+        if (wordCount <= OPTIMAL_SENTENCE_LENGTH) {
+            return 1.0;
+        } else if (wordCount <= MAX_SENTENCE_LENGTH) {
+            // Gradual penalty for longer sentences
+            return 1.0
+                    - (0.5 * (wordCount - OPTIMAL_SENTENCE_LENGTH) / (MAX_SENTENCE_LENGTH - OPTIMAL_SENTENCE_LENGTH));
+        } else {
+            // Heavy penalty for very long sentences
+            return 0.5;
+        }
+    }
+
     public Map<String, Double> incorporatePOSBias(Map<String, Double> scores, List<String> sentences,
             List<List<String>> taggedSentences) {
         Map<String, Double> adjustedScores = new HashMap<>(scores);
 
-        for (int i = 0; i < sentences.size(); i++) {
+        for (int i = 0; i < sentences.size() && i < taggedSentences.size(); i++) {
             String sentence = sentences.get(i);
-            if (i < taggedSentences.size()) {
-                List<String> tags = taggedSentences.get(i);
-                double posScore = calculatePOSScore(tags);
-                adjustedScores.put(sentence, adjustedScores.get(sentence) * posScore);
-            }
+            List<String> tags = taggedSentences.get(i);
+            double posScore = calculatePOSScore(tags);
+            adjustedScores.put(sentence, adjustedScores.get(sentence) * posScore);
         }
 
         return adjustedScores;
@@ -65,47 +116,60 @@ public class SentenceScorer {
 
     private double calculatePOSScore(List<String> tags) {
         if (tags.isEmpty()) {
-            return 1.0; // Neutral score if no tags
-        }
-
-        double totalWeight = 0.0;
-        int tagCount = 0;
-
-        for (String tag : tags) {
-            if (POS_WEIGHTS.containsKey(tag)) {
-                totalWeight += POS_WEIGHTS.get(tag);
-                tagCount++;
-            } else {
-                totalWeight += 0.5; // Default weight for unimportant tags
-                tagCount++;
-            }
-        }
-
-        if (tagCount == 0) {
             return 1.0;
         }
 
-        double averageWeight = totalWeight / tagCount;
+        double totalWeight = 0.0;
+        int importantTagCount = 0;
 
-        // Boost sentences with many important POS tags
-        double importantTagRatio = (double) countImportantTags(tags) / tags.size();
-        double boost = 1.0 + (importantTagRatio * 0.3); // Up to 30% boost
+        for (String tag : tags) {
+            double weight = POS_WEIGHTS.getOrDefault(tag, 0.6); // Better default
+            totalWeight += weight;
+            if (weight > 1.0) {
+                importantTagCount++;
+            }
+        }
 
-        return Math.min(1.8, averageWeight * boost); // Cap at 1.8x
+        double averageWeight = totalWeight / tags.size();
+
+        // More sophisticated boost calculation
+        double importantTagRatio = (double) importantTagCount / tags.size();
+        double diversityBoost = calculateDiversityBoost(tags);
+        double combinedBoost = 1.0 + (importantTagRatio * POS_BOOST_FACTOR) + diversityBoost;
+
+        return Math.min(MAX_SCORE_MULTIPLIER, averageWeight * combinedBoost);
     }
 
-    private int countImportantTags(List<String> tags) {
-        return (int) tags.stream()
-                .filter(tag -> POS_WEIGHTS.containsKey(tag) && POS_WEIGHTS.get(tag) > 1.0)
-                .count();
+    private double calculateDiversityBoost(List<String> tags) {
+        Set<String> uniqueImportantTags = new HashSet<>();
+        for (String tag : tags) {
+            if (POS_WEIGHTS.getOrDefault(tag, 0.0) > 1.0) {
+                uniqueImportantTags.add(tag);
+            }
+        }
+        // Boost for having diverse important POS types
+        return Math.min(0.2, uniqueImportantTags.size() * 0.05);
     }
 
     public Map<String, Double> normalizeScores(Map<String, Double> scores) {
+        if (scores.isEmpty()) {
+            return new HashMap<>();
+        }
+
         double totalScore = scores.values().stream().mapToDouble(Double::doubleValue).sum();
+        if (totalScore == 0.0) {
+            return scores; // Avoid division by zero
+        }
+
         Map<String, Double> normalizedScores = new HashMap<>();
-        for (String sentence : scores.keySet()) {
-            normalizedScores.put(sentence, scores.get(sentence) / totalScore);
+        for (Map.Entry<String, Double> entry : scores.entrySet()) {
+            normalizedScores.put(entry.getKey(), entry.getValue() / totalScore);
         }
         return normalizedScores;
+    }
+
+    // Method to clear cache if needed
+    public void clearCache() {
+        wordCountCache.clear();
     }
 }

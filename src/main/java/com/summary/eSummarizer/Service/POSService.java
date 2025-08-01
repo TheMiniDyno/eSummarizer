@@ -18,9 +18,9 @@ public class POSService {
     public POSService() {
         try {
             // Load POS tagger model
-            InputStream posModelStream = getClass().getResourceAsStream("/models/openNLP/en-pos.bin");
+            InputStream posModelStream = getClass().getResourceAsStream("/models/openNLP/en-pos-maxent.bin");
             if (posModelStream == null) {
-                throw new IOException("POS model file not found: /models/openNLP/en-pos.bin");
+                throw new IOException("POS model file not found: /models/openNLP/en-pos-maxent.bin");
             }
 
             POSModel posModel = new POSModel(posModelStream);

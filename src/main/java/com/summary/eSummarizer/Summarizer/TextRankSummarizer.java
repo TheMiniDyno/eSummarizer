@@ -116,12 +116,6 @@ public class TextRankSummarizer {
         return summaryInfo;
     }
 
-    /**
-     * Counts the number of words in the given text.
-     *
-     * @param text The input text.
-     * @return The word count.
-     */
     private int countWords(String text) {
         return text.split("\\s+").length;
     }
