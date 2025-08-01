@@ -6,13 +6,6 @@ import java.util.*;
 @Component
 public class SentenceScorer {
 
-    // Configuration constants
-    private static final double POSITION_BIAS_STRENGTH = 0.3;
-    private static final int OPTIMAL_SENTENCE_LENGTH = 20;
-    private static final int MAX_SENTENCE_LENGTH = 40;
-    private static final double POS_BOOST_FACTOR = 0.4;
-    private static final double MAX_SCORE_MULTIPLIER = 2.0;
-
     private static final Map<String, Double> POS_WEIGHTS;
 
     static {
@@ -56,16 +49,11 @@ public class SentenceScorer {
         POS_WEIGHTS = Collections.unmodifiableMap(weights);
     }
 
-    // Cache for word counts to avoid repeated splits
-    private final Map<String, Integer> wordCountCache = new HashMap<>();
-
     public Map<String, Double> incorporatePositionBias(Map<String, Double> scores, List<String> sentences) {
         Map<String, Double> adjustedScores = new HashMap<>(scores);
-
         for (int i = 0; i < sentences.size(); i++) {
             String sentence = sentences.get(i);
-            // Exponential decay rather than linear
-            double positionBias = 1.0 - (POSITION_BIAS_STRENGTH * Math.pow((double) i / sentences.size(), 2));
+            double positionBias = 1.0 - ((double) i / sentences.size());
             adjustedScores.put(sentence, adjustedScores.get(sentence) * positionBias);
         }
         return adjustedScores;
@@ -73,42 +61,25 @@ public class SentenceScorer {
 
     public Map<String, Double> adjustForSentenceLength(Map<String, Double> scores, List<String> sentences) {
         Map<String, Double> adjustedScores = new HashMap<>(scores);
-
         for (String sentence : sentences) {
-            int wordCount = getWordCount(sentence);
-            double lengthBias = calculateLengthBias(wordCount);
+            double lengthBias = 1.0 - ((double) sentence.split("\\s+").length / 30);
             adjustedScores.put(sentence, adjustedScores.get(sentence) * lengthBias);
         }
         return adjustedScores;
     }
 
-    private int getWordCount(String sentence) {
-        return wordCountCache.computeIfAbsent(sentence,
-                s -> s.trim().split("\\s+").length);
-    }
-
-    private double calculateLengthBias(int wordCount) {
-        if (wordCount <= OPTIMAL_SENTENCE_LENGTH) {
-            return 1.0;
-        } else if (wordCount <= MAX_SENTENCE_LENGTH) {
-            // Gradual penalty for longer sentences
-            return 1.0
-                    - (0.5 * (wordCount - OPTIMAL_SENTENCE_LENGTH) / (MAX_SENTENCE_LENGTH - OPTIMAL_SENTENCE_LENGTH));
-        } else {
-            // Heavy penalty for very long sentences
-            return 0.5;
-        }
-    }
-
+    // POS-based scoring
     public Map<String, Double> incorporatePOSBias(Map<String, Double> scores, List<String> sentences,
             List<List<String>> taggedSentences) {
         Map<String, Double> adjustedScores = new HashMap<>(scores);
 
-        for (int i = 0; i < sentences.size() && i < taggedSentences.size(); i++) {
+        for (int i = 0; i < sentences.size(); i++) {
             String sentence = sentences.get(i);
-            List<String> tags = taggedSentences.get(i);
-            double posScore = calculatePOSScore(tags);
-            adjustedScores.put(sentence, adjustedScores.get(sentence) * posScore);
+            if (i < taggedSentences.size()) {
+                List<String> tags = taggedSentences.get(i);
+                double posScore = calculatePOSScore(tags);
+                adjustedScores.put(sentence, adjustedScores.get(sentence) * posScore);
+            }
         }
 
         return adjustedScores;
@@ -116,60 +87,58 @@ public class SentenceScorer {
 
     private double calculatePOSScore(List<String> tags) {
         if (tags.isEmpty()) {
-            return 1.0;
+            return 1.0; // Neutral score if no tags
         }
 
         double totalWeight = 0.0;
-        int importantTagCount = 0;
+        int tagCount = 0;
 
         for (String tag : tags) {
-            double weight = POS_WEIGHTS.getOrDefault(tag, 0.6); // Better default
-            totalWeight += weight;
-            if (weight > 1.0) {
-                importantTagCount++;
+            if (POS_WEIGHTS.containsKey(tag)) {
+                totalWeight += POS_WEIGHTS.get(tag);
+                tagCount++;
+            } else {
+                totalWeight += 0.5; // Default weight for unimportant tags
+                tagCount++;
             }
         }
 
-        double averageWeight = totalWeight / tags.size();
+        if (tagCount == 0) {
+            return 1.0;
+        }
 
-        // More sophisticated boost calculation
-        double importantTagRatio = (double) importantTagCount / tags.size();
-        double diversityBoost = calculateDiversityBoost(tags);
-        double combinedBoost = 1.0 + (importantTagRatio * POS_BOOST_FACTOR) + diversityBoost;
+        double averageWeight = totalWeight / tagCount;
 
-        return Math.min(MAX_SCORE_MULTIPLIER, averageWeight * combinedBoost);
+        // Boost sentences with many important POS tags
+        double importantTagRatio = (double) countImportantTags(tags) / tags.size();
+        double boost = 1.0 + (importantTagRatio * 0.3); // Up to 30% boost
+
+        return Math.min(1.8, averageWeight * boost); // Cap at 1.8x
     }
 
-    private double calculateDiversityBoost(List<String> tags) {
-        Set<String> uniqueImportantTags = new HashSet<>();
-        for (String tag : tags) {
-            if (POS_WEIGHTS.getOrDefault(tag, 0.0) > 1.0) {
-                uniqueImportantTags.add(tag);
-            }
-        }
-        // Boost for having diverse important POS types
-        return Math.min(0.2, uniqueImportantTags.size() * 0.05);
+    private int countImportantTags(List<String> tags) {
+        return (int) tags.stream()
+                .filter(tag -> POS_WEIGHTS.containsKey(tag) && POS_WEIGHTS.get(tag) > 1.0)
+                .count();
     }
 
     public Map<String, Double> normalizeScores(Map<String, Double> scores) {
-        if (scores.isEmpty()) {
-            return new HashMap<>();
-        }
-
         double totalScore = scores.values().stream().mapToDouble(Double::doubleValue).sum();
-        if (totalScore == 0.0) {
-            return scores; // Avoid division by zero
-        }
+        System.out.println("totalScore001: " + totalScore);
 
         Map<String, Double> normalizedScores = new HashMap<>();
-        for (Map.Entry<String, Double> entry : scores.entrySet()) {
-            normalizedScores.put(entry.getKey(), entry.getValue() / totalScore);
-        }
-        return normalizedScores;
-    }
+        for (String sentence : scores.keySet()) {
+            double normalizedScore = scores.get(sentence) / totalScore;
+            normalizedScores.put(sentence, normalizedScore);
 
-    // Method to clear cache if needed
-    public void clearCache() {
-        wordCountCache.clear();
+            // Print each sentence with its rank
+            System.out.println("Sentence: " + sentence.substring(0, Math.min(50, sentence.length())) + "...");
+            System.out.println("Raw Score: " + scores.get(sentence));
+            System.out.println("Normalized Score: " + normalizedScore);
+            System.out.println("Percentage: " + String.format("%.2f%%", normalizedScore * 100));
+            System.out.println("---");
+        }
+
+        return normalizedScores;
     }
 }
